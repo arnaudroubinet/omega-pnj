@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: omega-pnj-config
+  namespace: omega-pnj
+data:
+  # Database
+  DB_URL: "jdbc:postgresql://postgres-service:5432/npc_db"
+  DB_USERNAME: "npc_user"
+
+  # Ollama
+  QUARKUS_LANGCHAIN4J_OLLAMA_BASE_URL: "http://ollama-service:11434"
+
+  # LangChain4j
+  QUARKUS_LANGCHAIN4J_OLLAMA_CHAT_MODEL_MODEL_ID: "llama2"
+  QUARKUS_LANGCHAIN4J_OLLAMA_CHAT_MODEL_TEMPERATURE: "0.7"
+  QUARKUS_LANGCHAIN4J_OLLAMA_TIMEOUT: "120s"
+  QUARKUS_LANGCHAIN4J_EASY_RAG_PATH: "easy-rag-catalog"
+  QUARKUS_LANGCHAIN4J_EASY_RAG_REUSE_EMBEDDINGS_ENABLED: "true"
+
+  # NPC Memory
+  NPC_MEMORY_CONVERSATION_HISTORY_LIMIT: "10"
+  NPC_MEMORY_TOP_MEMORIES_LIMIT: "5"
+  NPC_MEMORY_CHAT_WINDOW_SIZE: "20"
+
+  # Hibernate
+  QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: "update"
+  QUARKUS_HIBERNATE_ORM_LOG_SQL: "false"
+
+  # HTTP
+  QUARKUS_HTTP_PORT: "8080"
+  QUARKUS_HTTP_CORS: "true"
+
+  # Logging
+  QUARKUS_LOG_LEVEL: "INFO"
+  QUARKUS_LOG_CATEGORY_ARO_KI_PNJ_LEVEL: "DEBUG"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: omega-pnj-secrets
+  namespace: omega-pnj
+type: Opaque
+stringData:
+  DB_PASSWORD: "changeme"  # À changer en production!
+  POSTGRES_PASSWORD: "changeme"  # À changer en production!

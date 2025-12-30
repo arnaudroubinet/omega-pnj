@@ -1,0 +1,75 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: omega-pnj-ingress
+  namespace: omega-pnj
+  labels:
+    app: omega-pnj
+  annotations:
+    # Pour nginx-ingress-controller
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+    # Augmenter les timeouts pour les requêtes LLM qui peuvent être longues
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+
+    # CORS (déjà géré par l'app mais peut être utile)
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+
+    # Pour cert-manager (certificat SSL automatique avec Let's Encrypt)
+    # Décommentez si vous utilisez cert-manager
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+spec:
+  ingressClassName: nginx  # Ou votre ingress controller
+
+  # TLS configuration (optionnel mais recommandé)
+  # Décommentez et configurez pour HTTPS
+  # tls:
+  # - hosts:
+  #   - omega-pnj.example.com
+  #   secretName: omega-pnj-tls
+
+  rules:
+  - host: omega-pnj.example.com  # Remplacez par votre domaine
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: omega-pnj-service
+            port:
+              number: 80
+
+---
+# Alternative: Ingress sans nom de domaine (utilise l'IP du Load Balancer)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: omega-pnj-ingress-no-host
+  namespace: omega-pnj
+  labels:
+    app: omega-pnj
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: omega-pnj-service
+            port:
+              number: 80

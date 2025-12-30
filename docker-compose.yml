@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: omega-pnj-db
+    environment:
+      POSTGRES_DB: npc_db
+      POSTGRES_USER: npc_user
+      POSTGRES_PASSWORD: changeme
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U npc_user -d npc_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: omega-pnj-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    # Si vous n'avez pas de GPU, commentez la section deploy ci-dessus
+
+  # Service pour télécharger le modèle llama2 au démarrage
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: omega-pnj-ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        echo "Waiting for Ollama to be ready..."
+        sleep 10
+        echo "Pulling llama2 model..."
+        ollama pull llama2
+        echo "Model llama2 is ready!"
+    environment:
+      - OLLAMA_HOST=ollama:11434
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omega-pnj-app
+    ports:
+      - "8080:8080"
+    environment:
+      # Database
+      DB_URL: jdbc:postgresql://postgres:5432/npc_db
+      DB_USERNAME: npc_user
+      DB_PASSWORD: changeme
+      # Ollama
+      QUARKUS_LANGCHAIN4J_OLLAMA_BASE_URL: http://ollama:11434
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  postgres_data:
+    driver: local
+  ollama_data:
+    driver: local
