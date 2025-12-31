@@ -453,3 +453,45 @@
         padding: var(--spacing-lg);
     }
 }
+
+/* Chain of Thought styles */
+.thinking-details {
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-md);
+    background: var(--color-gray-50);
+    overflow: hidden;
+}
+
+.thinking-summary {
+    cursor: pointer;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.875rem;
+    color: var(--color-gray-600);
+    user-select: none;
+    list-style: none;
+    transition: background-color 0.2s;
+}
+
+.thinking-summary:hover {
+    background: var(--color-gray-100);
+}
+
+.thinking-summary::marker {
+    display: none;
+}
+
+.thinking-details[open] .thinking-summary {
+    border-bottom: 1px solid var(--color-gray-300);
+    background: var(--color-gray-100);
+}
+
+.thinking-content {
+    padding: var(--spacing-sm);
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--color-gray-700);
+    background: white;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}

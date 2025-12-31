@@ -3,7 +3,6 @@ package aro.ki.pnj.service;
 import aro.ki.pnj.entity.Interaction;
 import aro.ki.pnj.entity.Memory;
 import aro.ki.pnj.entity.Npc;
-import aro.ki.pnj.entity.Relationship;
 import aro.ki.pnj.model.InteractionType;
 import aro.ki.pnj.repository.InteractionRepository;
 import aro.ki.pnj.repository.MemoryRepository;
@@ -17,7 +16,6 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @ApplicationScoped
@@ -31,6 +29,9 @@ public class ContextBuilderService {
 
     @Inject
     RelationshipRepository relationshipRepository;
+
+    @Inject
+    ChainOfThoughtParser cotParser;
 
     @ConfigProperty(name = "npc.memory.top-memories-limit", defaultValue = "5")
     int topMemoriesLimit;
@@ -101,6 +102,9 @@ public class ContextBuilderService {
         systemMessage.append("- Keep responses concise (2-3 sentences typically)\n");
         systemMessage.append("- Show emotions appropriate to the situation\n");
         systemMessage.append("- Use the same language as ").append(characterName).append("\n");
+
+        // Chain of Thought instructions
+        systemMessage.append(cotParser.buildCoTInstructions());
 
         return systemMessage.toString();
     }

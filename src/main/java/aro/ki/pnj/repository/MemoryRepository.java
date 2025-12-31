@@ -21,4 +21,18 @@ public class MemoryRepository implements PanacheRepository<Memory> {
                     npcId, characterName)
                .list();
     }
+
+    public List<Memory> findByNpcId(Long npcId) {
+        return find("npc.id = ?1 order by createdAt desc", npcId).list();
+    }
+
+    public List<Memory> findByNpcAndCharacter(Long npcId, String characterName) {
+        return findAllMemoriesForCharacter(npcId, characterName);
+    }
+
+    public List<Memory> findTopMemories(Long npcId, int limit) {
+        return find("npc.id = ?1 order by importance desc, createdAt desc", npcId)
+               .range(0, limit - 1)
+               .list();
+    }
 }

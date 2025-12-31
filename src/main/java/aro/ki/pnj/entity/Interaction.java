@@ -30,6 +30,9 @@ public class Interaction extends PanacheEntity {
     @Column(length = 4000)
     public String response;
 
+    @Column(length = 2000)
+    public String thinking;  // Chain of Thought - pensée interne du PNJ
+
     @Column(nullable = false)
     public LocalDateTime timestamp;
 

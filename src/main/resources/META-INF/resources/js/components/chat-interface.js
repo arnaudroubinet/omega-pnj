@@ -184,6 +184,12 @@ function loadChatHistory() {
         } else {
             return `
                 <div class="chat-message npc">
+                    ${msg.thinking ? `
+                        <details class="thinking-details">
+                            <summary class="thinking-summary">💭 Voir la pensée</summary>
+                            <div class="thinking-content">${escapeHtml(msg.thinking)}</div>
+                        </details>
+                    ` : ''}
                     <div class="message-bubble">${escapeHtml(msg.message)}</div>
                     <div class="message-meta">
                         ${formatTime(msg.timestamp)}
@@ -258,6 +264,7 @@ async function handleSendMessage() {
         saveChatMessage(currentNpcId, characterName, {
             type: 'npc',
             message: response.npcResponse,
+            thinking: response.thinking,  // Chain of Thought
             emotionalState: response.emotionalState,
             relationshipChange: response.relationshipChange,
             timestamp: response.timestamp
